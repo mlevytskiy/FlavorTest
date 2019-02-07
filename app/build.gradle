@@ -10,11 +10,74 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+    def customAppId = ""
+    def customAppIdSuffix = ""
+
     buildTypes {
-        release {
+        dev {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            matchingFallbacks = ['release']
+            customAppIdSuffix = "dev"
         }
+
+        devDebug {
+            matchingFallbacks = ['debug']
+            customAppIdSuffix = "dev"
+        }
+
+        itestRelease {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            matchingFallbacks = ['release']
+            customAppIdSuffix = "test"
+        }
+
+        itestDebug {
+            matchingFallbacks = ['debug']
+            customAppIdSuffix = "test"
+        }
+
+        stageRelease {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            customAppIdSuffix = "stage"
+            matchingFallbacks = ['release']
+        }
+
+        stageDebug {
+            customAppIdSuffix = "stage"
+            matchingFallbacks = ['debug']
+        }
+
+        prodRelease {
+            customAppIdSuffix = "prod"
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            matchingFallbacks = ['release']
+        }
+
+        prodDebug {
+            customAppIdSuffix = "prod"
+            matchingFallbacks = ['debug']
+        }
+    }
+    flavorDimensions "appVariant"
+    productFlavors {
+        chev {
+            dimension "appVariant"
+            customAppId = "com.stuzo.chevron"
+        }
+
+        tex {
+            dimension "appVariant"
+            customAppId = "com.stuzo.texaco"
+        }
+    }
+
+    android.applicationVariants.all { variant ->
+        variant.mergedFlavor.setApplicationId(customAppId + customAppIdSuffix)
     }
 }
 
