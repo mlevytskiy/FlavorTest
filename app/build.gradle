@@ -1,5 +1,22 @@
 apply plugin: 'com.android.application'
 
+// This class will be used to create our custom property
+class StringExtension {
+    String value
+
+    StringExtension (String value) {
+        this.value = value
+    }
+
+    void setValue(String value) {
+        this.value = value
+    }
+
+    String getValue() {
+        return value
+    }
+}
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -10,73 +27,60 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
-
-    def customAppId = ""
-    def customAppIdSuffix = ""
+    productFlavors.whenObjectAdded { flavor ->
+        flavor.extensions.create("customAppId", StringExtension, '')
+        flavor.extensions.create("customAppIdSuffix", StringExtension, '')
+    }
 
     buildTypes {
-        dev {
+        release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            matchingFallbacks = ['release']
-            customAppIdSuffix = "dev"
         }
 
-        devDebug {
-            matchingFallbacks = ['debug']
-            customAppIdSuffix = "dev"
-        }
+        debug {
 
-        itestRelease {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            matchingFallbacks = ['release']
-            customAppIdSuffix = "test"
-        }
-
-        itestDebug {
-            matchingFallbacks = ['debug']
-            customAppIdSuffix = "test"
-        }
-
-        stageRelease {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            customAppIdSuffix = "stage"
-            matchingFallbacks = ['release']
-        }
-
-        stageDebug {
-            customAppIdSuffix = "stage"
-            matchingFallbacks = ['debug']
-        }
-
-        prodRelease {
-            customAppIdSuffix = "prod"
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            matchingFallbacks = ['release']
-        }
-
-        prodDebug {
-            customAppIdSuffix = "prod"
-            matchingFallbacks = ['debug']
         }
     }
-    flavorDimensions "appVariant"
+
+    flavorDimensions "brand", "appVariant"
+
     productFlavors {
-        chev {
+        dev {
             dimension "appVariant"
-            customAppId = "com.stuzo.chevron"
+            customAppIdSuffix.value = "dev"
+        }
+
+        itest {
+            dimension "appVariant"
+            customAppIdSuffix.value = "test"
+        }
+
+        stage {
+            dimension "appVariant"
+            customAppIdSuffix.value = "stage"
+        }
+
+        prod {
+            dimension "appVariant"
+            customAppIdSuffix.value = ""
+        }
+
+        chev {
+            dimension "brand"
+            customAppId.value = "com.stuzo.chevron"
         }
 
         tex {
-            dimension "appVariant"
-            customAppId = "com.stuzo.texaco"
+            dimension "brand"
+            customAppId.value = "com.stuzo.texaco"
         }
+
     }
 
     android.applicationVariants.all { variant ->
+        def customAppId = variant.productFlavors.get(0).customAppId.value
+        def customAppIdSuffix = variant.productFlavors.get(1).customAppIdSuffix.value
         variant.mergedFlavor.setApplicationId(customAppId + customAppIdSuffix)
     }
 }
